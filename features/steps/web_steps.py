@@ -129,6 +129,17 @@ def step_impl(context, message):
     element = context.driver.find_element(By.ID, 'flash_message')
     assert message in element.text
 
+@then('I should not see "{text}" in the results')
+def step_impl(context, text):
+    """ Check the search results to ensure specific text is NOT present """
+    # 1. Temukan elemen kontainer hasil pencarian
+    element = context.driver.find_element(By.ID, 'search_results')
+    
+    # 2. Pastikan teks tersebut TIDAK ada di dalam konten elemen
+    error_msg = f"Expected not to see '{text}' in search results, but it was found"
+    assert text not in element.text, error_msg
+
+
 ##################################################################
 # This code works because of the following naming convention:
 # The id field for text input in the html is the element name
