@@ -43,6 +43,23 @@ DATABASE_URI = os.getenv(
 class TestProductModel(unittest.TestCase):
     """Test Cases for Product Model"""
 
+    def test_read_a_product(self):
+        """It should Read a Product"""
+        # 1. Buat produk palsu dan simpan ke database
+        product = ProductFactory()
+        product.id = None
+        product.create()
+        self.assertIsNotNone(product.id)
+
+        # 2. Tarik kembali produk tersebut menggunakan fungsi find()
+        found_product = Product.find(product.id)
+
+        # 3. Pastikan data yang ditarik sama persis dengan data awal
+        self.assertEqual(found_product.id, product.id)
+        self.assertEqual(found_product.name, product.name)
+        self.assertEqual(found_product.description, product.description)
+        self.assertEqual(found_product.price, product.price)
+
     @classmethod
     def setUpClass(cls):
         """This runs once before the entire test suite"""
@@ -72,7 +89,13 @@ class TestProductModel(unittest.TestCase):
 
     def test_create_a_product(self):
         """It should Create a product and assert that it exists"""
-        product = Product(name="Fedora", description="A red hat", price=12.50, available=True, category=Category.CLOTHS)
+        product = Product(
+            name="Fedora",
+            description="A red hat",
+            price=12.50,
+            available=True,
+            category=Category.CLOTHS,
+        )
         self.assertEqual(str(product), "<Product Fedora id=[None]>")
         self.assertTrue(product is not None)
         self.assertEqual(product.id, None)
