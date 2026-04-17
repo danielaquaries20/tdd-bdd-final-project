@@ -162,6 +162,29 @@ class TestProductModel(unittest.TestCase):
         for product in found:
             self.assertEqual(product.category, category)
 
+    def test_find_by_availability(self):
+        """It should Find Products by Availability"""
+        # 1. Buat 10 produk palsu sekaligus dan simpan ke database
+        products = ProductFactory.create_batch(10)
+        for product in products:
+            product.create()
+            
+        # 2. Ambil status ketersediaan (True/False) dari produk pertama
+        availability = products[0].available
+        
+        # 3. Hitung manual berapa banyak produk yang memiliki status ketersediaan yang sama
+        count = len([product for product in products if product.available == availability])
+        
+        # 4. Panggil metode find_by_availability() dari model
+        found = Product.find_by_availability(availability)
+        
+        # 5. Verifikasi bahwa jumlah produk yang ditemukan sama dengan hitungan manual
+        self.assertEqual(found.count(), count)
+        
+        # 6. Verifikasi bahwa setiap produk yang ditarik memiliki status ketersediaan yang tepat
+        for product in found:
+            self.assertEqual(product.available, availability)
+
     @classmethod
     def setUpClass(cls):
         """This runs once before the entire test suite"""
