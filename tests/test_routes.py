@@ -51,6 +51,23 @@ BASE_URL = "/products"
 class TestProductRoutes(TestCase):
     """Product Service tests"""
 
+    def test_get_product(self):
+        """It should Read a single Product"""
+        # 1. Buat satu produk palsu menggunakan fungsi helper yang sudah ada di kelas tes
+        test_product = self._create_products(1)[0]
+
+        # 2. Lakukan simulasi HTTP GET request ke endpoint produk menggunakan ID-nya
+        response = self.client.get(f"{BASE_URL}/{test_product.id}")
+
+        # 3. Verifikasi bahwa API merespons dengan status 200 OK
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # 4. Ekstrak data JSON dari respons
+        data = response.get_json()
+
+        # 5. Pastikan nama produk di JSON sama dengan nama produk yang kita buat
+        self.assertEqual(data["name"], test_product.name)
+
     @classmethod
     def setUpClass(cls):
         """Run once before all tests"""
@@ -85,7 +102,9 @@ class TestProductRoutes(TestCase):
             test_product = ProductFactory()
             response = self.client.post(BASE_URL, json=test_product.serialize())
             self.assertEqual(
-                response.status_code, status.HTTP_201_CREATED, "Could not create test product"
+                response.status_code,
+                status.HTTP_201_CREATED,
+                "Could not create test product",
             )
             new_product = response.get_json()
             test_product.id = new_product["id"]
@@ -106,7 +125,7 @@ class TestProductRoutes(TestCase):
         response = self.client.get("/health")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.get_json()
-        self.assertEqual(data['message'], 'OK')
+        self.assertEqual(data["message"], "OK")
 
     # ----------------------------------------------------------
     # TEST CREATE
