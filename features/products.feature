@@ -101,3 +101,13 @@ Scenario: List all Products
     And I should see "Shoes" in the results
     And I should see "Big Mac" in the results
     And I should see "Sheets" in the results
+
+Scenario: Search by Category
+    Given I am on the "Home Page"
+    When I press the "Clear" button
+    And I select "Food" from the "Category" dropdown
+    And I press the "Search" button
+    Then I should see the message "Success"
+    And I should see "Big Mac" in the results
+    And I should not see "Hat" in the results
+    And I should not see "Shoes" in the results
