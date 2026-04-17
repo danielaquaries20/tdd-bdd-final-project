@@ -99,6 +99,23 @@ class TestProductModel(unittest.TestCase):
         # 4. Verifikasi bahwa produk sudah terhapus (jumlah produk di database = 0)
         self.assertEqual(len(Product.all()), 0)
 
+    def test_list_all_products(self):
+        """It should List all Products in the database"""
+        # 1. Pastikan database kosong terlebih dahulu
+        products_in_db = Product.all()
+        self.assertEqual(products_in_db, [])
+        
+        # 2. Buat 5 produk palsu dan simpan ke database
+        for _ in range(5):
+            product = ProductFactory()
+            product.create()
+            
+        # 3. Panggil metode all() untuk mengambil semua produk
+        products = Product.all()
+        
+        # 4. Verifikasi bahwa jumlah produk yang ditarik adalah 5
+        self.assertEqual(len(products), 5)
+
     @classmethod
     def setUpClass(cls):
         """This runs once before the entire test suite"""
