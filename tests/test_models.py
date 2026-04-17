@@ -64,13 +64,13 @@ class TestProductModel(unittest.TestCase):
         product.id = None
         product.create()
         self.assertIsNotNone(product.id)
-        
+
         # Simpan ID asli untuk memastikan ID tidak berubah saat di-update
         original_id = product.id
 
         # 2. Ubah salah satu atribut (misal: deskripsi)
         product.description = "testing description update"
-        
+
         # 3. Panggil metode update() dari model
         product.update()
 
@@ -89,13 +89,13 @@ class TestProductModel(unittest.TestCase):
         # 1. Buat produk palsu dan simpan ke database
         product = ProductFactory()
         product.create()
-        
+
         # 2. Pastikan produk berhasil tersimpan (jumlah produk di database = 1)
         self.assertEqual(len(Product.all()), 1)
-        
+
         # 3. Panggil metode delete() dari model untuk menghapus produk tersebut
         product.delete()
-        
+
         # 4. Verifikasi bahwa produk sudah terhapus (jumlah produk di database = 0)
         self.assertEqual(len(Product.all()), 0)
 
@@ -104,17 +104,40 @@ class TestProductModel(unittest.TestCase):
         # 1. Pastikan database kosong terlebih dahulu
         products_in_db = Product.all()
         self.assertEqual(products_in_db, [])
-        
+
         # 2. Buat 5 produk palsu dan simpan ke database
         for _ in range(5):
             product = ProductFactory()
             product.create()
-            
+
         # 3. Panggil metode all() untuk mengambil semua produk
         products = Product.all()
-        
+
         # 4. Verifikasi bahwa jumlah produk yang ditarik adalah 5
         self.assertEqual(len(products), 5)
+
+    def test_find_by_name(self):
+        """It should Find a Product by Name"""
+        # 1. Buat 5 produk palsu sekaligus (batch) dan simpan ke database
+        products = ProductFactory.create_batch(5)
+        for product in products:
+            product.create()
+
+        # 2. Ambil nama dari produk pertama sebagai target pencarian
+        name = products[0].name
+
+        # 3. Hitung secara manual berapa banyak produk di daftar kita yang punya nama tersebut
+        count = len([product for product in products if product.name == name])
+
+        # 4. Panggil metode find_by_name() dari database
+        found = Product.find_by_name(name)
+
+        # 5. Verifikasi bahwa jumlah produk yang ditemukan sama dengan hitungan manual
+        self.assertEqual(found.count(), count)
+
+        # 6. Verifikasi bahwa setiap produk yang ditarik memang memiliki nama yang dicari
+        for product in found:
+            self.assertEqual(product.name, name)
 
     @classmethod
     def setUpClass(cls):
