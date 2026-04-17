@@ -114,6 +114,21 @@ def step_impl(context, button):
     # 2. Cari elemen berdasarkan ID dan lakukan klik
     context.driver.find_element(By.ID, element_id).click()
 
+@then('I should see "{text}" in the results')
+def step_impl(context, text):
+    """ Check the search results for the presence of a specific text """
+    # 1. Temukan elemen tabel atau kontainer hasil (biasanya ID-nya 'search_results')
+    element = context.driver.find_element(By.ID, 'search_results')
+    
+    # 2. Lakukan asersi untuk memastikan teks yang dicari ada di dalam konten elemen tersebut
+    assert text in element.text
+
+@then('I should see the message "{message}"')
+def step_impl(context, message):
+    """ Check for a flash message """
+    element = context.driver.find_element(By.ID, 'flash_message')
+    assert message in element.text
+
 ##################################################################
 # This code works because of the following naming convention:
 # The id field for text input in the html is the element name
