@@ -68,6 +68,27 @@ class TestProductRoutes(TestCase):
         # 5. Pastikan nama produk di JSON sama dengan nama produk yang kita buat
         self.assertEqual(data["name"], test_product.name)
 
+    def test_update_product(self):
+        """It should Update an existing Product"""
+        # 1. Buat satu produk palsu untuk diuji
+        test_product = self._create_products(1)[0]
+        
+        # 2. Lakukan perubahan pada salah satu atribut (misalnya deskripsi)
+        test_product.description = "This is a new description for testing update"
+        
+        # 3. Kirimkan HTTP PUT request ke endpoint produk beserta data terbarunya dalam format JSON
+        response = self.client.put(
+            f"{BASE_URL}/{test_product.id}",
+            json=test_product.serialize()
+        )
+        
+        # 4. Verifikasi bahwa API merespons dengan status 200 OK
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+        # 5. Tarik respons JSON dan pastikan deskripsinya benar-benar sudah berubah
+        updated_product = response.get_json()
+        self.assertEqual(updated_product["description"], "This is a new description for testing update")
+
     @classmethod
     def setUpClass(cls):
         """Run once before all tests"""
