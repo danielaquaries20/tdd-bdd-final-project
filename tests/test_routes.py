@@ -186,6 +186,34 @@ class TestProductRoutes(TestCase):
         for product in data:
             self.assertEqual(product["category"], category.name)
 
+    def test_get_product_list_by_availability(self):
+        """It should Get a list of Products by Availability"""
+        # 1. Buat 10 produk palsu di database
+        products = self._create_products(10)
+        
+        # 2. Ambil status ketersediaan dari produk pertama
+        available_value = products[0].available
+        
+        # 3. Hitung manual berapa banyak produk yang memiliki status ketersediaan yang sama
+        found_products = [product for product in products if product.available == available_value]
+        found_count = len(found_products)
+        
+        # 4. Kirim HTTP GET request. Kita ubah nilai boolean Python (True/False) 
+        # menjadi string huruf kecil ('true'/'false') untuk parameter URL.
+        available_str = str(available_value).lower()
+        response = self.client.get(f"{BASE_URL}?available={available_str}")
+        
+        # 5. Verifikasi bahwa API merespons dengan status 200 OK
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+        # 6. Tarik data JSON dan pastikan jumlahnya persis sama dengan hitungan manual
+        data = response.get_json()
+        self.assertEqual(len(data), found_count)
+        
+        # 7. Pastikan setiap produk yang dikembalikan benar-benar memiliki status ketersediaan yang tepat
+        for product in data:
+            self.assertEqual(product["available"], available_value)
+
     @classmethod
     def setUpClass(cls):
         """Run once before all tests"""
