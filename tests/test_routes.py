@@ -32,6 +32,7 @@ from service import app
 from service.common import status
 from service.models import db, init_db, Product
 from tests.factories import ProductFactory
+from urllib.parse import quote_plus
 
 # Disable all but critical errors during normal test run
 # uncomment for debugging failing tests
@@ -125,6 +126,35 @@ class TestProductRoutes(TestCase):
         
         # 5. Pastikan data yang dikembalikan berupa list/array dan panjangnya tepat 5
         self.assertEqual(len(data), 5)
+
+    def test_get_product_list_by_name(self):
+        """It should Get a list of Products by Name"""
+        # 1. Buat 10 produk palsu di database
+        products = self._create_products(10)
+        
+        # 2. Ambil nama produk pertama sebagai target pencarian
+        test_name = products[0].name
+        
+        # 3. Hitung manual berapa banyak produk yang namanya sama dengan target
+        name_products = [product for product in products if product.name == test_name]
+        
+        # 4. Kirim HTTP GET request dengan query string ?name=nama_produk
+        # (Kita gunakan quote_plus agar spasi pada nama diubah menjadi URL-encoded format, misal: %20)
+        from urllib.parse import quote_plus
+        response = self.client.get(
+            f"{BASE_URL}?name={quote_plus(test_name)}"
+        )
+        
+        # 5. Verifikasi bahwa API merespons dengan status 200 OK
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+        # 6. Tarik data JSON dan pastikan jumlahnya sama dengan hitungan manual kita
+        data = response.get_json()
+        self.assertEqual(len(data), len(name_products))
+        
+        # 7. Pastikan setiap produk yang dikembalikan benar-benar memiliki nama tersebut
+        for product in data:
+            self.assertEqual(product["name"], test_name)
 
     @classmethod
     def setUpClass(cls):
