@@ -104,7 +104,15 @@ def step_impl(context, element_name):
 # to get the element id of any button
 ##################################################################
 
-## UPDATE CODE HERE ##
+@when('I press the "{button}" button')
+def step_impl(context, button):
+    """ Click on a button by its ID """
+    # 1. Ubah nama tombol menjadi ID elemen (misal: "Search" menjadi "search-btn")
+    # Tergantung pada template Anda, biasanya menggunakan format:
+    element_id = button.lower().replace(' ', '-') + '-btn'
+    
+    # 2. Cari elemen berdasarkan ID dan lakukan klik
+    context.driver.find_element(By.ID, element_id).click()
 
 ##################################################################
 # This code works because of the following naming convention:
