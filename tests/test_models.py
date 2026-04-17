@@ -139,6 +139,29 @@ class TestProductModel(unittest.TestCase):
         for product in found:
             self.assertEqual(product.name, name)
 
+    def test_find_by_category(self):
+        """It should Find Products by Category"""
+        # 1. Buat 10 produk palsu sekaligus dan simpan ke database
+        products = ProductFactory.create_batch(10)
+        for product in products:
+            product.create()
+            
+        # 2. Ambil kategori dari produk pertama sebagai target pencarian
+        category = products[0].category
+        
+        # 3. Hitung secara manual berapa banyak produk di daftar kita yang punya kategori tersebut
+        count = len([product for product in products if product.category == category])
+        
+        # 4. Panggil metode find_by_category() dari model
+        found = Product.find_by_category(category)
+        
+        # 5. Verifikasi bahwa jumlah produk yang ditemukan sama dengan hitungan manual
+        self.assertEqual(found.count(), count)
+        
+        # 6. Verifikasi bahwa setiap produk yang ditarik memang memiliki kategori yang dicari
+        for product in found:
+            self.assertEqual(product.category, category)
+
     @classmethod
     def setUpClass(cls):
         """This runs once before the entire test suite"""
