@@ -139,6 +139,15 @@ def step_impl(context, text):
     error_msg = f"Expected not to see '{text}' in search results, but it was found"
     assert text not in element.text, error_msg
 
+@then('I should see the message "{message}"')
+def step_impl(context, message):
+    """ Check for a flash message to be present on the page """
+    # 1. Cari elemen yang menampung pesan (biasanya ID-nya 'flash_message')
+    element = context.driver.find_element(By.ID, 'flash_message')
+    
+    # 2. Pastikan pesan yang diharapkan ada di dalam teks elemen tersebut
+    # Kita menggunakan asersi untuk memvalidasi hasil pengujian
+    assert message in element.text
 
 ##################################################################
 # This code works because of the following naming convention:
