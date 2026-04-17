@@ -159,6 +159,20 @@ def update_products(product_id):
 ######################################################################
 
 
-#
-# PLACE YOUR CODE TO DELETE A PRODUCT HERE
-#
+@app.route("/products/<int:product_id>", methods=["DELETE"])
+def delete_products(product_id):
+    """
+    Delete a Product
+    This endpoint will delete a Product based on the id specified in the path
+    """
+    app.logger.info("Request to Delete a product with id [%s]", product_id)
+
+    # 1. Cari produk di database
+    product = Product.find(product_id)
+
+    # 2. Jika produk ditemukan, hapus dari database
+    if product:
+        product.delete()
+
+    # 3. Kembalikan status 204 No Content (standar untuk penghapusan sukses)
+    return "", status.HTTP_204_NO_CONTENT
