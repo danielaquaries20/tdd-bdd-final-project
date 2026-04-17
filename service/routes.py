@@ -98,9 +98,43 @@ def create_products():
 # L I S T   A L L   P R O D U C T S
 ######################################################################
 
-#
-# PLACE YOUR CODE TO LIST ALL PRODUCTS HERE
-#
+
+@app.route("/products", methods=["GET"])
+def list_products():
+    """Returns a list of Products"""
+    app.logger.info("Request to list Products...")
+
+    products = []
+
+    # Ambil parameter query string dari URL
+    name = request.args.get("name")
+    category = request.args.get("category")
+    available = request.args.get("available")
+
+    # Logika Filter Pencarian
+    if name:
+        app.logger.info("Filtering by name: %s", name)
+        products = Product.find_by_name(name)
+    elif category:
+        app.logger.info("Filtering by category: %s", category)
+        # Mengonversi string kategori dari URL menjadi Enum Category
+        category_value = getattr(Category, category.upper(), None)
+        if category_value:
+            products = Product.find_by_category(category_value)
+    elif available:
+        app.logger.info("Filtering by availability: %s", available)
+        # Mengonversi string 'true'/'false' menjadi boolean Python
+        available_value = available.lower() in ["true", "1", "yes"]
+        products = Product.find_by_availability(available_value)
+    else:
+        app.logger.info("Returning all products")
+        products = Product.all()
+
+    # Serialisasi hasil ke format JSON
+    results = [product.serialize() for product in products]
+    app.logger.info("Returning %d products", len(results))
+    return jsonify(results), status.HTTP_200_OK
+
 
 ######################################################################
 # READ A PRODUCT
@@ -115,18 +149,22 @@ def get_products(product_id):
 
     # 1. Cari produk di database menggunakan fungsi find() dari model
     product = Product.find(product_id)
-    
+
     # 2. Jika produk tidak ditemukan, kembalikan error 404 Not Found
     if not product:
-        abort(status.HTTP_404_NOT_FOUND, f"Product with id '{product_id}' was not found.")
+        abort(
+            status.HTTP_404_NOT_FOUND, f"Product with id '{product_id}' was not found."
+        )
 
     # 3. Jika ditemukan, kembalikan data produk dalam format JSON beserta status 200 OK
     app.logger.info("Returning product: %s", product.name)
     return jsonify(product.serialize()), status.HTTP_200_OK
 
+
 ######################################################################
 # U P D A T E   A   P R O D U C T
 ######################################################################
+
 
 @app.route("/products/<int:product_id>", methods=["POST", "PUT"])
 def update_products(product_id):
@@ -138,21 +176,24 @@ def update_products(product_id):
 
     # 1. Cari produk yang akan diubah di database
     product = Product.find(product_id)
-    
+
     # 2. Jika produk tidak ada, kembalikan error 404 Not Found
     if not product:
-        abort(status.HTTP_404_NOT_FOUND, f"Product with id '{product_id}' was not found.")
+        abort(
+            status.HTTP_404_NOT_FOUND, f"Product with id '{product_id}' was not found."
+        )
 
     # 3. Ambil data baru dari JSON request dan perbarui model
     # (Metode deserialize() digunakan untuk mengubah JSON kembali menjadi objek model)
     product.deserialize(request.get_json())
     product.id = product_id
-    
+
     # 4. Simpan perubahan ke database menggunakan metode update()
     product.update()
 
     # 5. Kembalikan data yang sudah diperbarui beserta status 200 OK
     return jsonify(product.serialize()), status.HTTP_200_OK
+
 
 ######################################################################
 # D E L E T E   A   P R O D U C T
