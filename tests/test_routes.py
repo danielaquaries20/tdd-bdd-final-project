@@ -73,40 +73,42 @@ class TestProductRoutes(TestCase):
         """It should Update an existing Product"""
         # 1. Buat satu produk palsu untuk diuji
         test_product = self._create_products(1)[0]
-        
+
         # 2. Lakukan perubahan pada salah satu atribut (misalnya deskripsi)
         test_product.description = "This is a new description for testing update"
-        
+
         # 3. Kirimkan HTTP PUT request ke endpoint produk beserta data terbarunya dalam format JSON
         response = self.client.put(
-            f"{BASE_URL}/{test_product.id}",
-            json=test_product.serialize()
+            f"{BASE_URL}/{test_product.id}", json=test_product.serialize()
         )
-        
+
         # 4. Verifikasi bahwa API merespons dengan status 200 OK
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        
+
         # 5. Tarik respons JSON dan pastikan deskripsinya benar-benar sudah berubah
         updated_product = response.get_json()
-        self.assertEqual(updated_product["description"], "This is a new description for testing update")
+        self.assertEqual(
+            updated_product["description"],
+            "This is a new description for testing update",
+        )
 
     def test_delete_product(self):
         """It should Delete a Product"""
         # 1. Buat sekumpulan produk palsu (misalnya 5) untuk memastikan tidak semuanya terhapus
         products = self._create_products(5)
-        
+
         # 2. Ambil produk pertama sebagai target yang akan dihapus
         product_to_delete = products[0]
-        
+
         # 3. Kirimkan HTTP DELETE request ke endpoint produk tersebut
         response = self.client.delete(f"{BASE_URL}/{product_to_delete.id}")
-        
+
         # 4. Verifikasi bahwa API merespons dengan status 204 No Content
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        
+
         # 5. Lakukan double-check dengan mengirim HTTP GET request ke ID yang baru saja dihapus
         response = self.client.get(f"{BASE_URL}/{product_to_delete.id}")
-        
+
         # 6. Verifikasi bahwa API sekarang merespons dengan status 404 Not Found
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -114,16 +116,16 @@ class TestProductRoutes(TestCase):
         """It should Get a list of Products"""
         # 1. Buat sekumpulan produk palsu (misalnya 5 produk) di database
         self._create_products(5)
-        
+
         # 2. Kirimkan HTTP GET request ke endpoint utama (BASE_URL)
         response = self.client.get(BASE_URL)
-        
+
         # 3. Verifikasi bahwa API merespons dengan status 200 OK
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        
+
         # 4. Tarik data JSON dari respons
         data = response.get_json()
-        
+
         # 5. Pastikan data yang dikembalikan berupa list/array dan panjangnya tepat 5
         self.assertEqual(len(data), 5)
 
@@ -131,30 +133,58 @@ class TestProductRoutes(TestCase):
         """It should Get a list of Products by Name"""
         # 1. Buat 10 produk palsu di database
         products = self._create_products(10)
-        
+
         # 2. Ambil nama produk pertama sebagai target pencarian
         test_name = products[0].name
-        
+
         # 3. Hitung manual berapa banyak produk yang namanya sama dengan target
         name_products = [product for product in products if product.name == test_name]
-        
+
         # 4. Kirim HTTP GET request dengan query string ?name=nama_produk
         # (Kita gunakan quote_plus agar spasi pada nama diubah menjadi URL-encoded format, misal: %20)
         from urllib.parse import quote_plus
-        response = self.client.get(
-            f"{BASE_URL}?name={quote_plus(test_name)}"
-        )
-        
+
+        response = self.client.get(f"{BASE_URL}?name={quote_plus(test_name)}")
+
         # 5. Verifikasi bahwa API merespons dengan status 200 OK
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        
+
         # 6. Tarik data JSON dan pastikan jumlahnya sama dengan hitungan manual kita
         data = response.get_json()
         self.assertEqual(len(data), len(name_products))
-        
+
         # 7. Pastikan setiap produk yang dikembalikan benar-benar memiliki nama tersebut
         for product in data:
             self.assertEqual(product["name"], test_name)
+
+    def test_get_product_list_by_category(self):
+        """It should Get a list of Products by Category"""
+        # 1. Buat 10 produk palsu di database
+        products = self._create_products(10)
+
+        # 2. Ambil kategori dari produk pertama sebagai target pencarian
+        category = products[0].category
+
+        # 3. Hitung manual berapa banyak produk yang memiliki kategori tersebut
+        found_products = [
+            product for product in products if product.category == category
+        ]
+        found_count = len(found_products)
+
+        # 4. Kirim HTTP GET request dengan query string ?category=nama_kategori
+        # (Karena category adalah Enum, kita gunakan category.name untuk mendapatkan bentuk teksnya)
+        response = self.client.get(f"{BASE_URL}?category={category.name}")
+
+        # 5. Verifikasi bahwa API merespons dengan status 200 OK
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # 6. Tarik data JSON dan pastikan jumlahnya sama dengan hitungan manual
+        data = response.get_json()
+        self.assertEqual(len(data), found_count)
+
+        # 7. Pastikan setiap produk yang dikembalikan benar-benar memiliki kategori yang sesuai
+        for product in data:
+            self.assertEqual(product["category"], category.name)
 
     @classmethod
     def setUpClass(cls):
