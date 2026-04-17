@@ -84,6 +84,21 @@ class TestProductModel(unittest.TestCase):
         self.assertEqual(products[0].id, original_id)
         self.assertEqual(products[0].description, "testing description update")
 
+    def test_delete_a_product(self):
+        """It should Delete a Product"""
+        # 1. Buat produk palsu dan simpan ke database
+        product = ProductFactory()
+        product.create()
+        
+        # 2. Pastikan produk berhasil tersimpan (jumlah produk di database = 1)
+        self.assertEqual(len(Product.all()), 1)
+        
+        # 3. Panggil metode delete() dari model untuk menghapus produk tersebut
+        product.delete()
+        
+        # 4. Verifikasi bahwa produk sudah terhapus (jumlah produk di database = 0)
+        self.assertEqual(len(Product.all()), 0)
+
     @classmethod
     def setUpClass(cls):
         """This runs once before the entire test suite"""
