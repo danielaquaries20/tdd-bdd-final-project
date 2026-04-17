@@ -109,6 +109,23 @@ class TestProductRoutes(TestCase):
         # 6. Verifikasi bahwa API sekarang merespons dengan status 404 Not Found
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
+    def test_get_product_list(self):
+        """It should Get a list of Products"""
+        # 1. Buat sekumpulan produk palsu (misalnya 5 produk) di database
+        self._create_products(5)
+        
+        # 2. Kirimkan HTTP GET request ke endpoint utama (BASE_URL)
+        response = self.client.get(BASE_URL)
+        
+        # 3. Verifikasi bahwa API merespons dengan status 200 OK
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+        # 4. Tarik data JSON dari respons
+        data = response.get_json()
+        
+        # 5. Pastikan data yang dikembalikan berupa list/array dan panjangnya tepat 5
+        self.assertEqual(len(data), 5)
+
     @classmethod
     def setUpClass(cls):
         """Run once before all tests"""
