@@ -45,20 +45,44 @@ class TestProductModel(unittest.TestCase):
 
     def test_read_a_product(self):
         """It should Read a Product"""
-        # 1. Buat produk palsu dan simpan ke database
         product = ProductFactory()
         product.id = None
         product.create()
         self.assertIsNotNone(product.id)
 
-        # 2. Tarik kembali produk tersebut menggunakan fungsi find()
         found_product = Product.find(product.id)
 
-        # 3. Pastikan data yang ditarik sama persis dengan data awal
         self.assertEqual(found_product.id, product.id)
         self.assertEqual(found_product.name, product.name)
         self.assertEqual(found_product.description, product.description)
         self.assertEqual(found_product.price, product.price)
+
+    def test_update_a_product(self):
+        """It should Update an existing Product"""
+        # 1. Buat produk palsu dan simpan ke database
+        product = ProductFactory()
+        product.id = None
+        product.create()
+        self.assertIsNotNone(product.id)
+        
+        # Simpan ID asli untuk memastikan ID tidak berubah saat di-update
+        original_id = product.id
+
+        # 2. Ubah salah satu atribut (misal: deskripsi)
+        product.description = "testing description update"
+        
+        # 3. Panggil metode update() dari model
+        product.update()
+
+        # 4. Verifikasi bahwa ID tidak berubah, namun deskripsi sudah berubah
+        self.assertEqual(product.id, original_id)
+        self.assertEqual(product.description, "testing description update")
+
+        # 5. Tarik kembali data dari database untuk memastikan perubahan tersimpan
+        products = Product.all()
+        self.assertEqual(len(products), 1)
+        self.assertEqual(products[0].id, original_id)
+        self.assertEqual(products[0].description, "testing description update")
 
     @classmethod
     def setUpClass(cls):
