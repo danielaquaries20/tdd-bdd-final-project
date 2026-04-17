@@ -89,6 +89,26 @@ class TestProductRoutes(TestCase):
         updated_product = response.get_json()
         self.assertEqual(updated_product["description"], "This is a new description for testing update")
 
+    def test_delete_product(self):
+        """It should Delete a Product"""
+        # 1. Buat sekumpulan produk palsu (misalnya 5) untuk memastikan tidak semuanya terhapus
+        products = self._create_products(5)
+        
+        # 2. Ambil produk pertama sebagai target yang akan dihapus
+        product_to_delete = products[0]
+        
+        # 3. Kirimkan HTTP DELETE request ke endpoint produk tersebut
+        response = self.client.delete(f"{BASE_URL}/{product_to_delete.id}")
+        
+        # 4. Verifikasi bahwa API merespons dengan status 204 No Content
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        
+        # 5. Lakukan double-check dengan mengirim HTTP GET request ke ID yang baru saja dihapus
+        response = self.client.get(f"{BASE_URL}/{product_to_delete.id}")
+        
+        # 6. Verifikasi bahwa API sekarang merespons dengan status 404 Not Found
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
     @classmethod
     def setUpClass(cls):
         """Run once before all tests"""
