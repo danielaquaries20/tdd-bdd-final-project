@@ -128,9 +128,31 @@ def get_products(product_id):
 # U P D A T E   A   P R O D U C T
 ######################################################################
 
-#
-# PLACE YOUR CODE TO UPDATE A PRODUCT HERE
-#
+@app.route("/products/<int:product_id>", methods=["POST", "PUT"])
+def update_products(product_id):
+    """
+    Update a Product
+    This endpoint will update a Product based on the body that is posted
+    """
+    app.logger.info("Request to Update a product with id [%s]", product_id)
+
+    # 1. Cari produk yang akan diubah di database
+    product = Product.find(product_id)
+    
+    # 2. Jika produk tidak ada, kembalikan error 404 Not Found
+    if not product:
+        abort(status.HTTP_404_NOT_FOUND, f"Product with id '{product_id}' was not found.")
+
+    # 3. Ambil data baru dari JSON request dan perbarui model
+    # (Metode deserialize() digunakan untuk mengubah JSON kembali menjadi objek model)
+    product.deserialize(request.get_json())
+    product.id = product_id
+    
+    # 4. Simpan perubahan ke database menggunakan metode update()
+    product.update()
+
+    # 5. Kembalikan data yang sudah diperbarui beserta status 200 OK
+    return jsonify(product.serialize()), status.HTTP_200_OK
 
 ######################################################################
 # D E L E T E   A   P R O D U C T
